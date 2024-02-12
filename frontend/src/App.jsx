@@ -1,13 +1,13 @@
-// Import bibliotek i komponentów React
+// Import React libraries and resources
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 
-// Utworzenie instancji socket.io i połączenie z serwerem na porcie 3000.
-const socket = io('http://192.168.50.108:3000');
+// Create a socket.io instance and connect to the server on port 3000.
+const socket = io('http://192.168.244.8:3000');
 
-// Komponent główny aplikacji React
+// The main component of a React application
 function App() {
-  //Stan komponentu
+  //Component status
   const [board, setBoard] = useState(Array(9).fill(null));
   const [status, setStatus] = useState('Click "Find Player" to start');
   const [gameOverMessage, setGameOverMessage] = useState(null);
@@ -17,66 +17,66 @@ function App() {
   const [showFindPlayerButton, setShowFindPlayerButton] = useState(true); // Dodaj nowy stan
   const [showPlayAgainButton, setShowPlayAgainButton] = useState(false);
 
- // Efekt uboczny do obsługi zdarzeń socket.io
+ // Side effect for socket.io event handling
   useEffect(() => {
-// Obsługa zdarzenia rozpoczęcia gry
+// Game start event handling
     socket.on('gameStart', (symbol, gameId) => {
       setStatus('Game started!');
       setPlayerSymbol(symbol);
       setGameId(gameId);
       setGameActive(true);
-      setShowFindPlayerButton(false); // Ukryj przycisk po rozpoczęciu gry
-      setShowPlayAgainButton(false); // Ukryj przycisk "Play Again" po rozpoczęciu gry
+      setShowFindPlayerButton(false); // Hide the button after starting the game
+      setShowPlayAgainButton(false); // Hide the "Play Again" button after starting the game
     });
 
-  // Obsługa zdarzenia ruchu gracza
+  // Player movement event handling
     socket.on('yourTurn', (newBoard) => {
       setBoard(newBoard);
       setStatus('Your turn!');
       console.log("New Board:", newBoard);
     });
 
- // Obsługa zdarzenia ruchu przeciwnika
+ // Handling the opponent's movement event
     socket.on('opponentTurn', (newBoard) => {
       setBoard(newBoard);
       setStatus('Opponent\'s turn...');
       console.log("New Board:", newBoard);
     });
 
-// Obsługa zdarzenia zakończenia gry
+// Game over event handling
     socket.on('gameOver', (message) => {
       setGameOverMessage(message);
       setStatus('Game Over');
       setGameActive(false);
-      setShowPlayAgainButton(true); // Pokaż przycisk "Play Again" po zakończeniu gry
+      setShowPlayAgainButton(true); // Show the "Play Again" button after the game is finished
     });
 
- // Obsługa zdarzenia nieprawidłowego ruchu
+ // Invalid traffic event handling
     socket.on('invalidMove', () => {
       setStatus('Invalid move! Try again.');
     });
 
- // Obsługa zdarzenia rozłączenia przeciwnika
+ // Handling the adversary disconnection event
     socket.on('opponentDisconnected', () => {
       setGameOverMessage('The opponent has disconnected!');
       setStatus('Game Over');
       setShowFindPlayerButton(true); // Pokaż przycisk po rozłączeniu przeciwnika
     });
 
- // Funkcja czyszcząca subskrypcje zdarzeń przy odmontowywaniu komponentu
+ // A function that clears event subscriptions when unmounting a component
     return () => {
       socket.off('gameStart');
       socket.off('yourTurn');
       socket.off('opponentTurn');
       socket.off('gameOver');
       socket.off('invalidMove');
-      socket.off('opponentDisconnected'); // Usuwanie obsługi zdarzenia rozłączenia
+      socket.off('opponentDisconnected'); // Remove the disconnection event handler
     };
-  }, []);  // Pusta tablica zależności oznacza, że efekt jest uruchamiany tylko raz po zamontowaniu komponentu
+  }, []);  // An empty dependency array means that the effect runs only once when the component is mounted
 
-  // Funkcja do wyszukiwania gracza
+  // Player search function
   const findPlayer = () => {
-  // Logika resetowania gry, gdy jest aktywna
+  // Game reset logic when active
     if (gameActive) {
       setBoard(Array(9).fill(null));
       setStatus('Click "Find Player" to start');
@@ -85,14 +85,14 @@ function App() {
       setGameId(null);
       setGameActive(false);
     }
-  // Wysłanie żądania do serwera o znalezienie gracza
+  // Sending a request to the server to find a player
     socket.emit('findPlayer');
     setStatus('Finding player...');
   };
   
-  // Obsługa kliknięcia w komórkę planszy
+  // Support for clicking on a board cell
   const handleCellClick = (position) => {
-  // Sprawdzenie stanu gry i obsługa różnych przypadków
+  // Checking the game status and handling various cases
     if (gameOverMessage)
     {
       setStatus('The game is over!');
@@ -108,17 +108,17 @@ function App() {
       setStatus('There is already a piece there!');
       return;
     }
-  // Wysłanie ruchu gracza do serwera
+  // Sending the player's traffic to the server
     socket.emit('makeMove', gameId, position);
   };
 
-  // Funkcja obsługująca przycisk "Play Again"
+  // Function supporting the "Play Again" button
   const playAgain = () => {
-    setShowPlayAgainButton(false);   // Ukryj przycisk "Play Again"
-    setShowFindPlayerButton(true);   // Pokaż przycisk "Find Player"
+    setShowPlayAgainButton(false);   // Hide "Play Again" button
+    setShowFindPlayerButton(true);   // Show "Find Player" button
     resetGameStates();
   };
-  // Funkcja resetująca stany gry
+  // Function that resets game states
   const resetGameStates = () => {
     setBoard(Array(9).fill(null));
     setStatus('Click "Find Player" to start');
@@ -128,7 +128,7 @@ function App() {
     setGameActive(false);
   };
  
-  // Funkcja renderująca pojedynczą komórkę planszy
+  // A function that renders a single cell of the board
   const renderCell = (position) => {
     return (
       <div className="cell" onClick={() => handleCellClick(position)}>
@@ -137,7 +137,7 @@ function App() {
     );
   };
 
-   // Zwrócenie struktury komponentu
+   // Returning the component structure
   return (
     <div className="tic-tac-toe">
       <h1>Tic Tac Toe</h1>
@@ -154,5 +154,5 @@ function App() {
     </div>
   );
 }
-  // Eksport komponentu 
+  // Component export
 export default App;

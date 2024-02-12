@@ -1,25 +1,25 @@
-// Importy bibliotek
+// Library imports
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 
-// Utworzenie instancji aplikacji Express oraz serwera HTTP
+// Creating an instance of the Express application and an HTTP server
 const app = express();
 const server = http.createServer(app);
 
-// Utworzenie instancji socket.io z ustawieniami CORS
+// Create a socket.io instance with CORS settings
 const io = new Server(server, {
   cors: {
-    origin: 'http://192.168.50.108:5173', // Zaktualizuj to z adresem URL frontendu.
+    origin: 'http://192.168.244.8:5173', // Update this with the frontend URL.
     methods: ['GET', 'POST'],
   },
 });
 
-// Zastosowanie middleware cors do aplikacji Express
+// Using middleware cors for Express applications
 app.use(cors());
 
-// Zmienne przechowujące stany gry
+// Variables storing game states
 let waitingPlayer = null;   // Keep track of player who is waiting for an opponent.
 const games = {};           // Store all active games.
 
